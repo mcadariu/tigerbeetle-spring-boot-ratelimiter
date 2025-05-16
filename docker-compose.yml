@@ -1,5 +1,5 @@
 networks:
-  monitor-net:
+  tigerbeetle_ratelimiting:
     driver: bridge
 
 volumes:
@@ -23,7 +23,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - monitor-net
+      - tigerbeetle_ratelimiting
 
   tigerbeetle_0:
     image: ghcr.io/tigerbeetle/tigerbeetle
@@ -35,7 +35,7 @@ services:
     ports:
       - 3001:3001
     networks:
-      - monitor-net
+      - tigerbeetle_ratelimiting
 
   prometheus:
     image: prom/prometheus:latest
@@ -58,5 +58,5 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      - monitor-net
+      - tigerbeetle_ratelimiting
 
