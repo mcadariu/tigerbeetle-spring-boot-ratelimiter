@@ -20,6 +20,9 @@ import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 public class RateLimitInterceptor implements HandlerInterceptor {
 
+    public static final int OPERATOR = 1;
+    public static final int USER = 2;
+
     private final Client client;
     private final ObservationRegistry observationRegistry;
 
@@ -34,8 +37,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         TransferBatch transfers = new TransferBatch(1);
         transfers.add();
         transfers.setId(new Random().nextInt());
-        transfers.setDebitAccountId(2);
-        transfers.setCreditAccountId(1);
+        transfers.setDebitAccountId(USER);
+        transfers.setCreditAccountId(OPERATOR);
         transfers.setLedger(1);
         transfers.setCode(1);
         transfers.setAmount(1);

@@ -18,6 +18,9 @@ import static com.tigerbeetle.AccountFlags.DEBITS_MUST_NOT_EXCEED_CREDITS;
 @RequiredArgsConstructor
 class RateLimiterConfigurer implements WebMvcConfigurer {
 
+    public static final int OPERATOR = 1;
+    public static final int USER = 2;
+
     private final Client client;
     private final ObservationRegistry observationRegistry;
 
@@ -25,12 +28,12 @@ class RateLimiterConfigurer implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         AccountBatch accounts = new AccountBatch(2);
         accounts.add();
-        accounts.setId(1);
+        accounts.setId(OPERATOR);
         accounts.setLedger(1);
         accounts.setCode(1);
 
         accounts.add();
-        accounts.setId(2);
+        accounts.setId(USER);
         accounts.setLedger(1);
         accounts.setCode(1);
         accounts.setFlags(DEBITS_MUST_NOT_EXCEED_CREDITS);
@@ -38,8 +41,8 @@ class RateLimiterConfigurer implements WebMvcConfigurer {
         TransferBatch transfers = new TransferBatch(1);
         transfers.add();
         transfers.setId(1);
-        transfers.setDebitAccountId(1);
-        transfers.setCreditAccountId(2);
+        transfers.setDebitAccountId(OPERATOR);
+        transfers.setCreditAccountId(USER);
         transfers.setLedger(1);
         transfers.setCode(1);
         transfers.setAmount(10);

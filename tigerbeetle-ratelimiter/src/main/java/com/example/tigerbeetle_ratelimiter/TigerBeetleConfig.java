@@ -1,7 +1,6 @@
 package com.example.tigerbeetle_ratelimiter;
 
 import com.tigerbeetle.Client;
-import com.tigerbeetle.UInt128;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
