@@ -20,45 +20,45 @@ import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TigerbeetleRatelimiterApplicationTests {
 
-	@LocalServerPort
-	private int port;
+    @LocalServerPort
+    private int port;
 
-	@Autowired
-	private TestRestTemplate restTemplate;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-	@Autowired
-	private TestObservationRegistry observationRegistry;
+    @Autowired
+    private TestObservationRegistry observationRegistry;
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
-	@RepeatedTest(11)
-	void rateLimiting(RepetitionInfo repetitionInfo) {
-		HttpStatusCode statusCode = this.restTemplate.getForEntity("http://localhost:" + port + "/greeting",
-				String.class).getStatusCode();
+    @RepeatedTest(11)
+    void rateLimiting(RepetitionInfo repetitionInfo) {
+        HttpStatusCode statusCode = this.restTemplate.getForEntity("http://localhost:" + port + "/greeting",
+                String.class).getStatusCode();
 
-		if (statusCode == HttpStatus.OK) {
-			return;
-		} else if (statusCode == TOO_MANY_REQUESTS
-				&& repetitionInfo.getCurrentRepetition() == 11) {
-			assertThat(observationRegistry)
-					.hasObservationWithNameEqualTo("ratelimit")
-					.that()
-					.hasBeenStarted()
-					.hasBeenStopped();
-			return;
-		} else {
-			fail("Unsuccessful test");
-		}
-	}
+        if (statusCode == HttpStatus.OK) {
+            return;
+        } else if (statusCode == TOO_MANY_REQUESTS
+                && repetitionInfo.getCurrentRepetition() == 11) {
+            assertThat(observationRegistry)
+                    .hasObservationWithNameEqualTo("ratelimit")
+                    .that()
+                    .hasBeenStarted()
+                    .hasBeenStopped();
+            return;
+        } else {
+            fail("Unsuccessful test");
+        }
+    }
 
-	@TestConfiguration
-	static class ObservationTestConfiguration {
+    @TestConfiguration
+    static class ObservationTestConfiguration {
 
-		@Bean
-		TestObservationRegistry observationRegistry() {
-			return TestObservationRegistry.create();
-		}
-	}
+        @Bean
+        TestObservationRegistry observationRegistry() {
+            return TestObservationRegistry.create();
+        }
+    }
 }

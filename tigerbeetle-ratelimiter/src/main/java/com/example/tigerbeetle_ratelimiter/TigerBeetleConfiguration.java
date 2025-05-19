@@ -10,7 +10,7 @@ import java.math.BigInteger;
 import static com.tigerbeetle.UInt128.asBytes;
 
 @Configuration
-public class TigerBeetleConfig {
+public class TigerBeetleConfiguration {
     @Value("${tigerbeetle.clusterID:0}")
     private BigInteger clusterID;
 
