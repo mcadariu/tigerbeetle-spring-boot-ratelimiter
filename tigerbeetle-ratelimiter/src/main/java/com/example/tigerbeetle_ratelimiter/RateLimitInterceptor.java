@@ -57,7 +57,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             makeTransfer(10, OPERATOR_ID, USER, 0, 0);
         }
 
-        CreateTransferResultBatch transferErrors = makeTransfer(1, USER, OPERATOR_ID, 5, PENDING);
+        CreateTransferResultBatch transferErrors = makeTransfer(5, USER, OPERATOR_ID, 5, PENDING);
 
         if (transferErrors.next() && transferErrors.getResult().equals(ExceedsCredits)) {
             Observation observation = start("ratelimit", observationRegistry);
