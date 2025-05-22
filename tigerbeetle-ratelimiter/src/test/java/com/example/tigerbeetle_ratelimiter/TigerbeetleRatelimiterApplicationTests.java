@@ -1,27 +1,25 @@
 package com.example.tigerbeetle_ratelimiter;
 
 import io.micrometer.observation.tck.TestObservationRegistry;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 
-import static org.assertj.core.api.Assertions.fail;
 import static io.micrometer.observation.tck.TestObservationRegistryAssert.assertThat;
-import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TigerbeetleRatelimiterApplicationTests {
 
-    @LocalServerPort
-    private int port;
+    private static final int RATE_LIMIT = 10;
+    private static final String GREETING_ENDPOINT = "/greeting";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -33,24 +31,30 @@ class TigerbeetleRatelimiterApplicationTests {
     void contextLoads() {
     }
 
-    @RepeatedTest(11)
-    void rateLimiting(RepetitionInfo repetitionInfo) {
-        HttpStatusCode statusCode = this.restTemplate.getForEntity("http://localhost:" + port + "/greeting",
-                String.class).getStatusCode();
-
-        if (statusCode == HttpStatus.OK) {
-            return;
-        } else if (statusCode == TOO_MANY_REQUESTS
-                && repetitionInfo.getCurrentRepetition() == 11) {
-            assertThat(observationRegistry)
-                    .hasObservationWithNameEqualTo("ratelimit")
-                    .that()
-                    .hasBeenStarted()
-                    .hasBeenStopped();
-            return;
-        } else {
-            fail("Unsuccessful test");
+    @ParameterizedTest
+    @ValueSource(ints = {1, RATE_LIMIT - 1})
+    void shouldAllowRequestsWithinRateLimit(int requestCount) {
+        for (int i = 0; i < requestCount; i++) {
+            ResponseEntity<String> response = restTemplate.getForEntity(GREETING_ENDPOINT, String.class);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         }
+    }
+
+    @Test
+    void shouldRejectRequestsBeyondRateLimit() {
+        for (int i = 0; i < RATE_LIMIT; i++) {
+            restTemplate.getForEntity(GREETING_ENDPOINT, String.class);
+        }
+
+        // The next request should be rate limited
+        ResponseEntity<String> response = restTemplate.getForEntity(GREETING_ENDPOINT, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+
+        assertThat(observationRegistry)
+                .hasObservationWithNameEqualTo("ratelimit")
+                .that()
+                .hasBeenStarted()
+                .hasBeenStopped();
     }
 
     @TestConfiguration
