@@ -22,11 +22,6 @@ import static io.micrometer.observation.Observation.Event.of;
 import static io.micrometer.observation.Observation.start;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.servlet.HandlerInterceptor;
-
 public class RateLimitInterceptor implements HandlerInterceptor {
 
     //acquire this from your authentication system
