@@ -1,4 +1,4 @@
-package com.example.tigerbeetle_ratelimiter;
+package com.example.tigerbeetle_ratelimiter.config;
 
 import com.tigerbeetle.Client;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +14,7 @@ public class TigerBeetleConfiguration {
     @Value("${tigerbeetle.clusterID:0}")
     private BigInteger clusterID;
 
-    @Value("${tb_address:3001}")
+    @Value("${tigerbeetle_0:3001}")
     private String[] replicaAddress;
 
     @Bean

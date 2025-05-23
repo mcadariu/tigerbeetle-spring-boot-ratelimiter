@@ -1,4 +1,4 @@
-package com.example.tigerbeetle_ratelimiter;
+package com.example.tigerbeetle_ratelimiter.ratelimiting;
 
 import com.tigerbeetle.AccountBatch;
 import com.tigerbeetle.Client;

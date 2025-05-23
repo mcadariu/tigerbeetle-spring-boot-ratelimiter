@@ -16,14 +16,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 
+import static com.example.tigerbeetle_ratelimiter.ratelimiting.RateLimitInterceptor.PER_REQUEST_DEDUCTION;
+import static com.example.tigerbeetle_ratelimiter.ratelimiting.RateLimitInterceptor.USER_CREDIT_INITIAL_AMOUNT;
 import static io.micrometer.observation.tck.TestObservationRegistryAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-class TigerbeetleRatelimiterApplicationTests {
+class RatelimiterApplicationTests {
 
-    private static final String GREETING_ENDPOINT = "/greeting";
+    private static final String ENDPOINT = "/greeting";
 
     @Container
     public static DockerComposeContainer<?> environment =
@@ -41,12 +43,12 @@ class TigerbeetleRatelimiterApplicationTests {
 
     @Test
     void shouldRejectRequestsBeyondRateLimit() {
-        for (int i = 0; i < 2; i++) {
-            restTemplate.getForEntity(GREETING_ENDPOINT, String.class);
+        for (int i = 0; i < USER_CREDIT_INITIAL_AMOUNT / PER_REQUEST_DEDUCTION; i++) {
+            restTemplate.getForEntity(ENDPOINT, String.class);
         }
 
         // The next request should be rate limited
-        ResponseEntity<String> response = restTemplate.getForEntity(GREETING_ENDPOINT, String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(ENDPOINT, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
 
         assertThat(observationRegistry)

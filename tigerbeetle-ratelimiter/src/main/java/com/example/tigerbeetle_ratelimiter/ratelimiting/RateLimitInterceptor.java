@@ -1,4 +1,4 @@
-package com.example.tigerbeetle_ratelimiter;
+package com.example.tigerbeetle_ratelimiter.ratelimiting;
 
 import com.tigerbeetle.AccountBatch;
 import com.tigerbeetle.Client;
@@ -14,7 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.Random;
 
-import static com.example.tigerbeetle_ratelimiter.RateLimiterConfigurer.OPERATOR_ID;
+import static com.example.tigerbeetle_ratelimiter.ratelimiting.RateLimiterConfigurer.OPERATOR_ID;
 import static com.tigerbeetle.AccountFlags.DEBITS_MUST_NOT_EXCEED_CREDITS;
 import static com.tigerbeetle.CreateTransferResult.ExceedsCredits;
 import static com.tigerbeetle.TransferFlags.PENDING;
@@ -22,10 +22,18 @@ import static io.micrometer.observation.Observation.Event.of;
 import static io.micrometer.observation.Observation.start;
 import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.servlet.HandlerInterceptor;
+
 public class RateLimitInterceptor implements HandlerInterceptor {
 
     //acquire this from your authentication system
-    public static final int USER = new Random().nextInt();
+    public static final int USER_ID = new Random().nextInt();
+    public static final int PER_REQUEST_DEDUCTION = 5;
+    public static final int TIMEOUT_IN_SECONDS = 5;
+    public static final int USER_CREDIT_INITIAL_AMOUNT = 10;
 
     private final Client client;
     private final ObservationRegistry observationRegistry;
@@ -40,24 +48,36 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             @Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull Object handler) {
 
         IdBatch idBatch = new IdBatch(1);
-        idBatch.add(USER);
+        idBatch.add(USER_ID);
 
-        var userAccount = client.lookupAccounts(idBatch);
+        AccountBatch userAccount = client.lookupAccounts(idBatch);
 
         if (!userAccount.next()) {
-            AccountBatch accountBatch =  new AccountBatch(1);
+            AccountBatch accountBatch = new AccountBatch(1);
             accountBatch.add();
-            accountBatch.setId(USER);
+            accountBatch.setId(USER_ID);
             accountBatch.setLedger(1);
             accountBatch.setCode(1);
             accountBatch.setFlags(DEBITS_MUST_NOT_EXCEED_CREDITS);
 
             client.createAccounts(accountBatch);
 
-            makeTransfer(10, OPERATOR_ID, USER, 0, 0);
+            makeTransfer(
+                    USER_CREDIT_INITIAL_AMOUNT,
+                    OPERATOR_ID,
+                    USER_ID,
+                    0,
+                    0
+            );
         }
 
-        CreateTransferResultBatch transferErrors = makeTransfer(5, USER, OPERATOR_ID, 5, PENDING);
+        CreateTransferResultBatch transferErrors = makeTransfer(
+                        PER_REQUEST_DEDUCTION,
+                        USER_ID,
+                        OPERATOR_ID,
+                        TIMEOUT_IN_SECONDS,
+                        PENDING
+                );
 
         if (transferErrors.next() && transferErrors.getResult().equals(ExceedsCredits)) {
             Observation observation = start("ratelimit", observationRegistry);
