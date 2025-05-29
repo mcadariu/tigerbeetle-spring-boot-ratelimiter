@@ -1,0 +1,16 @@
+networks:
+  network:
+    driver: bridge
+
+services:
+  tigerbeetle_0:
+    image: ghcr.io/tigerbeetle/tigerbeetle
+    command: "start --addresses=0.0.0.0:3001 /data/0_0.tigerbeetle"
+    volumes:
+      - ./data:/data
+    security_opt:
+      - "seccomp=unconfined"
+    ports:
+      - 3001:3001
+    networks:
+      - network

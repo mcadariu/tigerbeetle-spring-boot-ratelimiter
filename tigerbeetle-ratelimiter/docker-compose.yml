@@ -1,6 +1,10 @@
 networks:
-  network:
+  net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/24
+          gateway: 10.5.0.1
 
 volumes:
   prometheus_data: { }
@@ -22,19 +26,24 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - network
+      - net
 
   tigerbeetle_0:
     image: ghcr.io/tigerbeetle/tigerbeetle
-    command: "start --addresses=0.0.0.0:3001 /data/0_0.tigerbeetle"
+    command: "start --addresses=0.0.0.0:4342 /data/0_0.tigerbeetle"
     volumes:
       - ./data:/data
     security_opt:
       - "seccomp=unconfined"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    expose:
+      - 4342
     ports:
-      - 3001:3001
+      - 4342:4342
     networks:
-      - network
+      net:
+        ipv4_address: 10.5.0.50
 
   prometheus:
     image: prom/prometheus:latest
@@ -56,4 +65,34 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      - network
+      net:
+        ipv4_address: 10.5.0.51
+
+  myapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - 'tigerbeetle_0=10.5.0.50:4342'
+    networks:
+      net:
+        ipv4_address: 10.5.0.52
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - tigerbeetle_0
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data:/var/tempo
+    ports:
+      - "3200:3200" # tempo
+      - "4318:4318"  # otlp http
+    networks:
+      net:
+        ipv4_address: 10.5.0.53

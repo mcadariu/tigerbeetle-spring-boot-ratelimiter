@@ -14,4 +14,4 @@ scrape_configs:
     honor_labels: true
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'host.docker.internal:8081' ]
+      - targets: [ '10.5.0.52:8081' ]

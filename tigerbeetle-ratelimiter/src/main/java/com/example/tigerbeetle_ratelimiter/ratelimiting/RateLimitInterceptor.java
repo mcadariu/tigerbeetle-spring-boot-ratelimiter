@@ -5,8 +5,10 @@ import com.tigerbeetle.Client;
 import com.tigerbeetle.CreateTransferResultBatch;
 import com.tigerbeetle.IdBatch;
 import com.tigerbeetle.TransferBatch;
+import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import io.opentelemetry.api.trace.Span;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +26,7 @@ import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
 
 public class RateLimitInterceptor implements HandlerInterceptor {
 
-    //acquire this from your authentication system
+    //this is to be retrieved from your authentication system
     public static final int USER_ID = new Random().nextInt();
     public static final int PER_REQUEST_DEDUCTION = 5;
     public static final int TIMEOUT_IN_SECONDS = 5;
@@ -77,7 +79,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         if (transferErrors.next() && transferErrors.getResult().equals(ExceedsCredits)) {
             Observation observation = start("ratelimit", observationRegistry);
             observation.event(of("limited"));
+            observation.lowCardinalityKeyValue(KeyValue.of("user", String.valueOf(USER_ID)));
             observation.stop();
+            Span.current().setAttribute("user", String.valueOf(USER_ID));
             response.setStatus(TOO_MANY_REQUESTS.value());
             return false;
         }
