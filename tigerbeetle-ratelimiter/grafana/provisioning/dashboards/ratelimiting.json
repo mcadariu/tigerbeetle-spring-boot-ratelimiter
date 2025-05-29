@@ -35,40 +35,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -76,10 +43,6 @@
             "steps": [
               {
                 "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -95,24 +58,28 @@
       "id": 45,
       "interval": "5",
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
       "pluginVersion": "12.0.0",
       "targets": [
         {
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "rate(ratelimit_limited_total[1m])",
+          "expr": "ratelimit_limited_total",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -121,8 +88,9 @@
           "useBackend": false
         }
       ],
-      "title": "Rate limiting",
-      "type": "timeseries"
+      "title": "Total",
+      "transparent": true,
+      "type": "stat"
     },
     {
       "datasource": {
@@ -177,7 +145,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "increase(http_server_requests_seconds_count[$__range])",
+          "expr": "http_server_requests_seconds_count",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "{{status}}",
@@ -187,6 +155,7 @@
         }
       ],
       "title": "Response codes",
+      "transparent": true,
       "type": "piechart"
     },
     {
@@ -273,7 +242,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum by(user) (rate(ratelimit_seconds_count[$__rate_interval]))",
+          "expr": "sum by(user) (ratelimit_seconds_count)",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "legendFormat": "user: {{user}}",
@@ -283,6 +252,7 @@
         }
       ],
       "title": "By user",
+      "transparent": true,
       "type": "timeseries"
     }
   ],
