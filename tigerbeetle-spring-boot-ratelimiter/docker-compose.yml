@@ -9,6 +9,7 @@ networks:
 volumes:
   prometheus_data: { }
   grafana_data: { }
+  tempo_data: { }
 
 services:
   grafana:
@@ -33,12 +34,6 @@ services:
       - ./data:/data
     security_opt:
       - "seccomp=unconfined"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    expose:
-      - 4342
-    ports:
-      - 4342:4342
     networks:
       net:
         ipv4_address: 10.5.0.50
@@ -56,12 +51,6 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     restart: unless-stopped
-    expose:
-      - 9090
-    ports:
-      - "9090:9090"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       net:
         ipv4_address: 10.5.0.51
@@ -77,8 +66,6 @@ services:
     networks:
       net:
         ipv4_address: 10.5.0.52
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     depends_on:
       - tigerbeetle_0
 
@@ -87,13 +74,7 @@ services:
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./tempo.yaml:/etc/tempo.yaml
-      - ./tempo-data:/var/tempo
-    ports:
-      - "3200:3200"
-      - "9095:9095"
-      - "4317:4317"
-      - "4318:4318"
-      - "9411:9411"
+      - tempo_data:/var/tempo
     networks:
       net:
         ipv4_address: 10.5.0.53
