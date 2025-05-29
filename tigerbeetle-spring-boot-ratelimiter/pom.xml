@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>tigerbeetle-ratelimiter</artifactId>
+	<artifactId>tigerbeetle-spring-boot-ratelimiter</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>tigerbeetle-ratelimiter</name>
 	<description>Demo project for Spring Boot</description>
