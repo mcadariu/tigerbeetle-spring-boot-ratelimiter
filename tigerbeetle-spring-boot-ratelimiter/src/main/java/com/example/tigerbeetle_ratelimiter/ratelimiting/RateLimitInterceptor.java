@@ -79,7 +79,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         if (transferErrors.next() && transferErrors.getResult().equals(ExceedsCredits)) {
             Observation observation = start("ratelimit", observationRegistry);
             observation.event(of("limited"));
-            observation.lowCardinalityKeyValue(KeyValue.of("user", String.valueOf(USER_ID)));
+            observation.highCardinalityKeyValue(KeyValue.of("user", String.valueOf(USER_ID)));
             observation.stop();
             Span.current().setAttribute("user", String.valueOf(USER_ID));
             response.setStatus(TOO_MANY_REQUESTS.value());

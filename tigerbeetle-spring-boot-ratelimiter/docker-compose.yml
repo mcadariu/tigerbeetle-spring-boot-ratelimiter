@@ -21,8 +21,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
-    expose:
-      - 3000
     ports:
       - "3000:3000"
     networks:
@@ -91,8 +89,11 @@ services:
       - ./tempo.yaml:/etc/tempo.yaml
       - ./tempo-data:/var/tempo
     ports:
-      - "3200:3200" # tempo
-      - "4318:4318"  # otlp http
+      - "3200:3200"
+      - "9095:9095"
+      - "4317:4317"
+      - "4318:4318"
+      - "9411:9411"
     networks:
       net:
         ipv4_address: 10.5.0.53
