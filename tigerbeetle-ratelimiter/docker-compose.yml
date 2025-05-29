@@ -1,5 +1,5 @@
 networks:
-  gigi:
+  net:
     driver: bridge
     ipam:
       config:
@@ -26,11 +26,10 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - gigi
+      - net
 
   tigerbeetle_0:
     image: ghcr.io/tigerbeetle/tigerbeetle
-    container_name: apigw-tomcat
     command: "start --addresses=0.0.0.0:4342 /data/0_0.tigerbeetle"
     volumes:
       - ./data:/data
@@ -43,7 +42,7 @@ services:
     ports:
       - 4342:4342
     networks:
-      gigi:
+      net:
         ipv4_address: 10.5.0.50
 
   prometheus:
@@ -66,7 +65,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      gigi:
+      net:
         ipv4_address: 10.5.0.51
 
   myapp:
@@ -75,8 +74,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - 'tigerbeetle_0=10.5.0.50:4342'
     networks:
-      gigi:
+      net:
         ipv4_address: 10.5.0.52
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -91,10 +92,7 @@ services:
       - ./tempo-data:/var/tempo
     ports:
       - "3200:3200" # tempo
-      - "9095:9095" # tempo grpc
-      - "4317:4317"  # otlp grpc
       - "4318:4318"  # otlp http
-      - "9411:9411"   # zipkin
     networks:
-      gigi:
+      net:
         ipv4_address: 10.5.0.53

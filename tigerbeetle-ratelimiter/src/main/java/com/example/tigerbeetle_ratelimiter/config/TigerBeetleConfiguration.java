@@ -19,6 +19,6 @@ public class TigerBeetleConfiguration {
 
     @Bean
     Client tigerBeetleClient() {
-        return new Client(asBytes(clusterID), new String[]{"10.5.0.50:4342"});
+        return new Client(asBytes(clusterID), replicaAddress);
     }
 }

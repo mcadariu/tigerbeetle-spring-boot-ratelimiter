@@ -21,7 +21,7 @@ import static com.example.tigerbeetle_ratelimiter.ratelimiting.RateLimitIntercep
 import static io.micrometer.observation.tck.TestObservationRegistryAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = { "tigerbeetle_0=3001" })
 @Testcontainers
 class RatelimiterApplicationTests {
 
@@ -29,7 +29,7 @@ class RatelimiterApplicationTests {
 
     @Container
     public static DockerComposeContainer<?> environment =
-            new DockerComposeContainer<>(new File("docker-compose.yml"));
+            new DockerComposeContainer<>(new File("docker-compose-tests.yml"));
 
     @Autowired
     private TestRestTemplate restTemplate;

@@ -13,7 +13,7 @@ EXPOSE 8080
 # Run the jar file
 ENTRYPOINT ["java", \
             "-javaagent:/app/opentelemetry-javaagent.jar", \
-            "-Dotel.service.name=your-service-name", \
+            "-Dotel.service.name=tigerbeetle-rate-limiting", \
             "-Dotel.traces.exporter=otlp", \
             "-Dotel.metrics.exporter=none", \
             "-Dotel.logs.exporter=none", \
